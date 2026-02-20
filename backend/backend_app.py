@@ -1,9 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from isort.api import sort_file
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"], # Global limits
+    storage_uri="memory://",
+)
 
 POSTS = [
     {"id": 1, "title": "The Scribe of god", "content": "I am Metatron. I am called the Scribe of God. Don't mess with me!"},
@@ -31,7 +38,8 @@ def validate_post_data(data):
     return None, 200
 
 
-@app.route('/api/posts', methods=['GET'])
+@app.route('/api/v1/posts', methods=['GET'])
+@limiter.limit("5 per minute")
 def get_posts():
     sort_query = request.args.get("sort")
     direction_query = request.args.get("direction")
@@ -48,10 +56,17 @@ def get_posts():
         is_desc = (direction_query == "desc")
         results = sorted(POSTS, key=lambda post: post[sort_query].lower(), reverse=is_desc)
 
-    return jsonify(results), 200
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_results = results[start:end]
+
+    return jsonify(paginated_results), 200
 
 
-@app.route('/api/posts', methods=['POST'])
+@app.route('/api/v1/posts', methods=['POST'])
 def add_post():
     new_post_data = request.get_json()
 
@@ -75,7 +90,7 @@ def add_post():
     return jsonify(new_post), 201
 
 
-@app.route('/api/posts/<int:id>', methods=['DELETE'])
+@app.route('/api/v1/posts/<int:id>', methods=['DELETE'])
 def delete_post(id):
     global POSTS
 
@@ -95,7 +110,7 @@ def fetch_post_by_id(post_id):
     return None
 
 
-@app.route('/api/posts/<int:id>', methods=['PUT'])
+@app.route('/api/v1/posts/<int:id>', methods=['PUT'])
 def update_post(id):
     post = fetch_post_by_id(id)
     if post is None:
@@ -109,7 +124,7 @@ def update_post(id):
     return jsonify(post), 200
 
 
-@app.route('/api/posts/search', methods=['GET'])
+@app.route('/api/v1/posts/search', methods=['GET'])
 def search_posts():
     title_query = request.args.get("title")
     content_query = request.args.get("content")
