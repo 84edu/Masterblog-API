@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from isort.api import sort_file
 
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
@@ -32,7 +33,16 @@ def validate_post_data(data):
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS), 200
+    sort_query = request.args.get("sort")
+    direction_query = request.args.get("direction")
+
+    results = POSTS
+
+    if sort_query in ["title", "content"]:
+        is_desc = (direction_query == "desc")
+        results = sorted(POSTS, key=lambda post: post[sort_query].lower(), reverse=is_desc)
+
+    return jsonify(results), 200
 
 
 @app.route('/api/posts', methods=['POST'])
