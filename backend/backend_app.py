@@ -57,7 +57,7 @@ def add_post():
 
 
 @app.route('/api/posts/<int:id>', methods=['DELETE'])
-def delete(id):
+def delete_post(id):
     global POSTS
 
     if id not in [post["id"] for post in POSTS]:
@@ -66,6 +66,28 @@ def delete(id):
     POSTS = [post for post in POSTS if post['id'] != id]
 
     return jsonify({"message": f"Post with id {id} has been deleted successfully."}), 200
+
+
+def fetch_post_by_id(post_id):
+    """Searches for a post using its ID"""
+    for post in POSTS:
+        if post["id"] == post_id:
+            return post
+    return None
+
+
+@app.route('/api/posts/<int:id>', methods=['PUT'])
+def update_post(id):
+    post = fetch_post_by_id(id)
+    if post is None:
+        return jsonify({"message": f"There is no Post with id {id}."}), 404
+
+    new_data = request.get_json()
+
+    post["title"] = new_data.get("title", post["title"])
+    post["content"] = new_data.get("content", post["content"])
+
+    return jsonify(post), 200
 
 
 if __name__ == '__main__':
