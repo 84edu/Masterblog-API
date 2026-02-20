@@ -5,8 +5,11 @@ app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 
 POSTS = [
-    {"id": 1, "title": "First post", "content": "This is the first post."},
-    {"id": 2, "title": "Second post", "content": "This is the second post."},
+    {"id": 1, "title": "The Scribe of god", "content": "I am Metatron. I am called the Scribe of God. Don't mess with me!"},
+    {"id": 2, "title": "Dean Winchester", "content": "I am Dean. Don't mess with me and please don't forget: I'm a human after all!"},
+    {"id": 3, "title": "Jack", "content": "I'll make everything ok!"},
+    {"id": 4, "title": "Castiel", "content": "I try to be the new god; strong!"},
+    {"id": 5, "title": "Sam Winchester", "content": "I'm Sam. I'll take care of all of the above characters :D"}
 ]
 
 
@@ -88,6 +91,23 @@ def update_post(id):
     post["content"] = new_data.get("content", post["content"])
 
     return jsonify(post), 200
+
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    title_query = request.args.get("title")
+    content_query = request.args.get("content")
+
+    # lowercase letter ONCE before the loop.
+    search_title = title_query.lower() if title_query else None
+    search_content = content_query.lower() if content_query else None
+
+    results = [post for post in POSTS
+               if (title_query and search_title in post["title"].lower())
+               or (content_query and search_content in post["content"].lower())
+               ]
+
+    return jsonify(results)
 
 
 if __name__ == '__main__':
