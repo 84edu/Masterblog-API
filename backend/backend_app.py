@@ -17,7 +17,8 @@ POSTS = [
     {"id": 2, "title": "Dean Winchester", "content": "I am Dean. Don't mess with me and please don't forget: I'm a human after all!"},
     {"id": 3, "title": "Jack", "content": "I'll make everything ok!"},
     {"id": 4, "title": "Castiel", "content": "I try to be the new god; strong!"},
-    {"id": 5, "title": "Sam Winchester", "content": "I'm Sam. I'll take care of all of the above characters :D"}
+    {"id": 5, "title": "Sam Winchester", "content": "I'm Sam. I'll take care of all of the above characters :D"},
+    {"id": 6, "title": "Lucifer", "content": "And I am Satan. Who wants to mess with me?"}
 ]
 
 
