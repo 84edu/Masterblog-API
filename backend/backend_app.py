@@ -36,9 +36,15 @@ def get_posts():
     sort_query = request.args.get("sort")
     direction_query = request.args.get("direction")
 
+    if sort_query and sort_query not in ["title", "content"]:
+        return jsonify({"error": f"Invalid sort field: {sort_query}. Allowed: title, content"}), 400
+
+    if direction_query and direction_query not in ["asc", "desc"]:
+        return jsonify({"error": f"Invalid direction: {direction_query}. Allowed: asc, desc"}), 400
+
     results = POSTS
 
-    if sort_query in ["title", "content"]:
+    if sort_query:
         is_desc = (direction_query == "desc")
         results = sorted(POSTS, key=lambda post: post[sort_query].lower(), reverse=is_desc)
 
